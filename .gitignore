@@ -1,0 +1,15 @@
+/Build
+/Library
+
+/Assets/Editor/CrossPlatformInput/
+/Assets/Editor/CrossPlatformInput/
+/Assets/Standard Assets/
+
+*.cache
+*.force
+
+*.sln
+*.suo
+*.csproj
+
+*.meta
