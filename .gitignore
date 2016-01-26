@@ -11,5 +11,6 @@
 *.sln
 *.suo
 *.csproj
+/Temp/
 
 *.meta
