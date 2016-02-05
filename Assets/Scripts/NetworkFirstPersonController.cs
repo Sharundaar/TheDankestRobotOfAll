@@ -88,7 +88,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
             m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
         }
 
-        if(Input.GetButtonDown("Pick"))
+        if(Input.GetButtonDown("Interact"))
         {
             CmdPick();
         }
@@ -126,6 +126,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
         {
             m_networkCommands.RpcSetParentTransformToNull(m_carriedCube);
             m_networkCommands.RpcSetUseGravity(m_carriedCube, true);
+            m_networkCommands.RpcSetKinematic(m_carriedCube, false);
             m_carriedCube = null;
         }
         else
@@ -134,8 +135,9 @@ public class NetworkFirstPersonController : NetworkBehaviour
             if (Physics.Raycast(transform.GetChild(0).position, transform.GetChild(0).transform.forward, out hit, 100.0f, LayerMask.GetMask("Carryable")))
             {
                 m_carriedCube = hit.rigidbody.gameObject;
-                m_networkCommands.RpcSetParentTransform(m_carriedCube, gameObject);
-                m_networkCommands.RpcSetUseGravity(m_carriedCube, false); 
+                m_networkCommands.RpcSetParentTransformToChild(m_carriedCube, gameObject, 0);
+                m_networkCommands.RpcSetUseGravity(m_carriedCube, false);
+                m_networkCommands.RpcSetKinematic(m_carriedCube, true); 
             }
         }
     }

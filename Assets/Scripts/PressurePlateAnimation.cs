@@ -95,6 +95,7 @@ public class PressurePlateAnimation : MonoBehaviour {
             m_activate = false;
             m_atRightPosition = false;
             m_timer = 0;
+
         }
     }
 }

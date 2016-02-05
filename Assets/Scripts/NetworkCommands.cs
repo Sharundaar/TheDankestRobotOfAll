@@ -53,10 +53,26 @@ public class NetworkCommands : NetworkBehaviour {
     }
 
     [ClientRpc]
+    public void RpcSetParentTransformToChild(GameObject child, GameObject parent, int childIndex)
+    {
+        var childTransform = child.transform;
+        var parentTransform = parent.transform;
+
+        childTransform.parent = parentTransform.GetChild(childIndex);
+    }
+
+    [ClientRpc]
     public void RpcSetUseGravity(GameObject obj, bool value)
     {
         // var objId = m_objects[obj];
         var objRigidbody = obj.GetComponent<Rigidbody>();
         objRigidbody.useGravity = value;
+    }
+
+    [ClientRpc]
+    public void RpcSetKinematic(GameObject obj, bool value)
+    {
+        var objRigidbody = obj.GetComponent<Rigidbody>();
+        objRigidbody.isKinematic = value;
     }
 }
