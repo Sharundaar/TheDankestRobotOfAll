@@ -24,15 +24,7 @@ public class ActivatorPressurePlate : AbstractActivator
 	protected override bool Activator(GameObject callingObject, bool state)
 	{
 		if(this.IsActivatorAuthorized(callingObject))
-		{
-			if(!state)
-			{
-				Debug.Log("Catching the Activator(false) for the pressure plate.");
-				return false;
-			}
-			else
-				Debug.Log("Activator(true).");
-			
+		{		
 			foreach(AbstractActivable activable in activableTargets)
 			{
 				if(activable != null)

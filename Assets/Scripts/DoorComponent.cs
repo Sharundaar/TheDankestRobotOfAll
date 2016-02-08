@@ -19,6 +19,9 @@ public class DoorComponent : MonoBehaviour {
     bool m_opened = false;
 
     Vector3 m_doorClosedPosition;
+	
+	/* Temporary fix variable */
+	private float openingQuantity = 0.0f;
 
     void Start()
     {
@@ -28,27 +31,31 @@ public class DoorComponent : MonoBehaviour {
 	void Update () {
         if ((m_opening && m_opened) || (!m_opening && !m_opened))
             return;
-
+		
 	    if(m_opening && !m_opened)
         {
             if(Vector2.Distance(m_door.transform.localPosition, m_doorClosedPosition) <= m_doorAmplitude)
-            {
+            {				
+				openingQuantity += m_openingDirection.magnitude * Time.deltaTime * m_openingSpeed;
                 m_door.transform.localPosition += m_openingDirection * Time.deltaTime * m_openingSpeed;
             }
             else
             {
+				openingQuantity = m_doorAmplitude;
                 m_door.transform.localPosition = m_openingDirection * m_doorAmplitude + m_doorClosedPosition;
                 m_opened = true;
             }
         }
         else if(!m_opening && m_opened)
-        {
-            if (Vector2.Distance(m_door.transform.localPosition, m_doorClosedPosition) > 0.01f)
+        {			
+            if (openingQuantity > 0.01f)
             {
+				openingQuantity -= m_openingDirection.magnitude * Time.deltaTime * m_openingSpeed;
                 m_door.transform.localPosition -= m_openingDirection * Time.deltaTime * m_openingSpeed;
             }
             else
             {
+				openingQuantity = 0.0f;
                 m_door.transform.localPosition = m_doorClosedPosition;
                 m_opened = false;
             }
@@ -65,6 +72,5 @@ public class DoorComponent : MonoBehaviour {
     {
         m_opened = true;
         m_opening = false;
-		Debug.Log("Close");
     }
 }

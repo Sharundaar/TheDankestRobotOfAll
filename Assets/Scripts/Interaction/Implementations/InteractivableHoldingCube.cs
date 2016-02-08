@@ -27,7 +27,6 @@ public class InteractivableHoldingCube : AbstractInteractivable
 		
 		if(interactionManager != null)
 		{					
-			Debug.Log("Interact : " + state);
 			if(!state)
 			{
 				this.GetComponent<Rigidbody>().useGravity = true;
