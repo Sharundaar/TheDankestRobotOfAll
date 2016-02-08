@@ -46,6 +46,9 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
     NetworkCommands m_networkCommands = null;
 
+    [SerializeField]
+    private UnityEngine.UI.Text LevelFinishedText;
+
     // Use this for initialization
     private void Start()
     {
@@ -319,5 +322,14 @@ public class NetworkFirstPersonController : NetworkBehaviour
             return;
         }
         body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+    }
+
+    public void OnLevelFinished()
+    {
+        if(isLocalPlayer)
+        {
+            LevelFinishedText.enabled = true;
+            enabled = false;
+        }
     }
 }
