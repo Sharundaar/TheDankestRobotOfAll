@@ -78,6 +78,8 @@ public class PressurePlateAnimation : MonoBehaviour {
                     m_activate = true;
                     m_atRightPosition = false;
                     m_timer = 0;
+					
+					this.CallActivator(true);
                 }
             }
         }
@@ -96,6 +98,17 @@ public class PressurePlateAnimation : MonoBehaviour {
             m_atRightPosition = false;
             m_timer = 0;
 
+			this.CallActivator(false);
         }
     }
+	
+	private void CallActivator(bool state)
+	{
+		ActivatorPressurePlate activator = this.gameObject.GetComponent<ActivatorPressurePlate>();
+		
+		if(activator != null)
+			activator.OnActivator(this.gameObject, state);
+		else
+			Debug.Log("PressurePlateActivator is null");
+	}
 }

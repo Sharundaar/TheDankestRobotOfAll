@@ -11,9 +11,13 @@ public class InteractionManager : MonoBehaviour
 	 */
 	
 	/* ==== Public variables ==== */
+	public Transform holdingTransform = null;
 	
 	/* ==== Private variables ==== */ 	
 	private Text interactTextField = null;
+	
+	private bool isHoldingCube = false;
+	private GameObject holdingCube = null;
 	
 	/* ==== Start function ==== */
 	void Start () 
@@ -29,29 +33,61 @@ public class InteractionManager : MonoBehaviour
 	/* ==== Update function ==== */
 	void Update () 
 	{		
-		Camera c = this.GetComponentInChildren<Camera>();
-		if(c != null)
+		Camera fpsCamera = this.GetComponentInChildren<Camera>();
+		if(fpsCamera != null)
 		{			
 			bool interactTextFieldVisibility = false;
 		
 			RaycastHit hitInfo;							
-			if (Physics.Raycast(c.transform.position, c.transform.TransformDirection(Vector3.forward), out hitInfo, 3)) 
+			if (Physics.Raycast(fpsCamera.transform.position, fpsCamera.transform.TransformDirection(Vector3.forward), out hitInfo, 3)) 
 			{
 				IInteractivable interactivableObject = hitInfo.collider.gameObject.GetComponent<IInteractivable>();
 
 				if(interactivableObject != null)
 				{
-					if(Input.GetButtonDown("Interact"))		
+					if(this.isHoldingCube)
 					{
-						bool hasInteract = interactivableObject.OnInteract(this.gameObject);						
+						if(hitInfo.collider.gameObject == this.holdingCube)
+						{
+							if(Input.GetButtonDown("Interact"))		
+							{
+								bool hasInteract = interactivableObject.OnInteract(this.gameObject, false);											
+							}						
+							else
+							{
+								interactTextFieldVisibility = true;				
+								interactTextField.text = "Press E to Release";										
+							}	
+						}			
 					}
 					else
-						interactTextFieldVisibility = true;
+					{
+						if(Input.GetButtonDown("Interact"))		
+						{
+							bool hasInteract = interactivableObject.OnInteract(this.gameObject, true);											
+						}		
+						else
+						{
+							interactTextFieldVisibility = true;		
+							interactTextField.text = "Press E to Interact";
+						}			
+					}
 				}
 			}
 			
 			this.SetInteractTextFieldVisibility(interactTextFieldVisibility);
 		}				
+	}
+	
+	/* ==== Interactions related functions ==== */
+	public Transform GetHoldingTransform()
+	{
+		return this.holdingTransform;
+	}
+	public void SetHoldingCube(GameObject holdingCube, bool state)
+	{
+		this.isHoldingCube = state;
+		this.holdingCube = holdingCube;
 	}
 	
 	/* ==== UI functions ==== */

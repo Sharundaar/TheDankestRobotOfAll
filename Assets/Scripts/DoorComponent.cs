@@ -65,5 +65,6 @@ public class DoorComponent : MonoBehaviour {
     {
         m_opened = true;
         m_opening = false;
+		Debug.Log("Close");
     }
 }
