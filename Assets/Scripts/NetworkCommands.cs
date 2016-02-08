@@ -5,29 +5,17 @@ using System.Collections.Generic;
 
 public class NetworkCommands : NetworkBehaviour {
 
-    private Dictionary<NetworkInstanceId, NetworkIdentity> m_objects = new Dictionary<NetworkInstanceId, NetworkIdentity>(); 
+    [SerializeField]
+    UnityEngine.UI.Text m_LevelFinishedText;
 
 	// Use this for initialization
 	void Start () {
-        var sceneObjects = FindObjectsOfType<NetworkIdentity>();
-        foreach(var obj in sceneObjects)
-        {
-            m_objects.Add(obj.netId, obj);
-        }
+        m_LevelFinishedText.gameObject.SetActive(false);
 	}
 
-    [ClientRpc]
-    public void RpcRegisterNetworkId(NetworkInstanceId id)
+    public void DisplayLevelFinished()
     {
-        var sceneObjects = FindObjectsOfType<NetworkIdentity>();
-        foreach (var obj in sceneObjects)
-        {
-            if(obj.netId.Equals(id))
-            {
-                m_objects.Add(id, obj);
-                break;
-            }
-        }
+        m_LevelFinishedText.gameObject.SetActive(true);
     }
 
     [ClientRpc]
