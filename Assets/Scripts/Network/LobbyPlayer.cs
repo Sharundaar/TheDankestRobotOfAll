@@ -87,6 +87,7 @@ public class LobbyPlayer : NetworkLobbyPlayer {
     private void OnReadyClicked()
     {
         SendReadyToBeginMessage();
+        
     }
 
     public void OnNameChanged(string str)
