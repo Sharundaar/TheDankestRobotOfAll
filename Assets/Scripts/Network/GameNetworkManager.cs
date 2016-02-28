@@ -85,7 +85,7 @@ public class GameNetworkManager : NetworkLobbyManager {
 
         m_GameManager.Debugger().AddMessage("New player connected.", Color.magenta);
 
-        m_playerList.CreatePlayerInformation(conn.connectionId, "Player", Color.green, PlayerInformations.PlayerType.NONE);
+        m_playerList.CreatePlayerInformation(conn.connectionId, "Player", Color.green, PlayerType.NONE);
         m_playerList.SyncPlayerInformationsList(); // we're on the server so we can go at it
     }
 

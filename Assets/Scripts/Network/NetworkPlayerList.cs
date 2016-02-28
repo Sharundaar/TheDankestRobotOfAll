@@ -29,7 +29,7 @@ class NetworkPlayerList : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcSyncPlayerInformations(int _id, string _name, Color _color, PlayerInformations.PlayerType _type)
+    public void RpcSyncPlayerInformations(int _id, string _name, Color _color, PlayerType _type)
     {
         bool found = false;
         foreach (var info in m_players)
@@ -52,7 +52,7 @@ class NetworkPlayerList : NetworkBehaviour
         }
     }
 
-    public void CreatePlayerInformation(int _id, string _name, Color _color, PlayerInformations.PlayerType _type)
+    public void CreatePlayerInformation(int _id, string _name, Color _color, PlayerType _type)
     {
         m_players.AddLast(new PlayerInformations(_id, _name, _color, _type));
     }

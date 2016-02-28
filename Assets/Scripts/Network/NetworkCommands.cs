@@ -8,14 +8,43 @@ public class NetworkCommands : NetworkBehaviour {
     [SerializeField]
     UnityEngine.UI.Text m_LevelFinishedText;
 
+    private static NetworkCommands s_Instance = null;
+    public static NetworkCommands Instance()
+    {
+        return s_Instance;
+    }
+
 	// Use this for initialization
 	void Start () {
-        m_LevelFinishedText.gameObject.SetActive(false);
+        DontDestroyOnLoad(gameObject);
+
+        if(m_LevelFinishedText != null)
+            m_LevelFinishedText.gameObject.SetActive(false);
+        s_Instance = this;
 	}
 
     public void DisplayLevelFinished()
     {
-        m_LevelFinishedText.gameObject.SetActive(true);
+        if (m_LevelFinishedText != null)
+            m_LevelFinishedText.gameObject.SetActive(true);
+    }
+
+    [ClientRpc]
+    public void RpcChangeRendererColor(GameObject obj, Color _color)
+    {
+        obj.GetComponentInChildren<Renderer>().material.color = _color;
+    }
+
+    public void ChangeRendererColor(GameObject obj, Color _color)
+    {
+        if(isServer)
+        {
+            obj.GetComponentInChildren<Renderer>().material.color = _color;
+        }
+        else
+        {
+            RpcChangeRendererColor(obj, _color);
+        }
     }
 
     [ClientRpc]

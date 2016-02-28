@@ -3,12 +3,6 @@ using System.Collections;
 using UnityEngine.Networking;
 
 public class PlayerInformations : NetworkBehaviour {
-    public enum PlayerType
-    {
-        NONE,
-        SCIENTIST,
-        ROBOT
-    }
 
     private int m_id;
     private string m_name;

@@ -60,6 +60,7 @@ public class GameManager : MonoBehaviour {
 
     public void ChangeMenuToMainMenu()
     {
-        ChangeMenuTo(m_MainMenu);
+        if(m_MainMenu != null)
+            ChangeMenuTo(m_MainMenu);
     }
 }

@@ -21,7 +21,6 @@ public class AdvancedNetworkManager : NetworkLobbyManager {
     public override GameObject OnLobbyServerCreateLobbyPlayer(NetworkConnection conn, short playerControllerId)
     {
         GameObject obj = Instantiate<GameObject>(lobbyPlayerPrefab.gameObject);
-        LobbyPlayer player = obj.GetComponent<LobbyPlayer>();
 
         return obj;
     }
