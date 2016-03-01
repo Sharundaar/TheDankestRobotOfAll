@@ -24,6 +24,13 @@ public class NetworkPlayer : LobbyPlayer
         }
     }
 
+    private NetworkConnection m_connection;
+    public NetworkConnection Connection
+    {
+        get { return m_connection; }
+        set { m_connection = value; }
+    }
+
     public void SyncPlayerType(PlayerType _type)
     {
         Type = _type;

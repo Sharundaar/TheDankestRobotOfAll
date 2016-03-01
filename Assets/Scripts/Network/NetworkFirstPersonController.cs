@@ -42,25 +42,60 @@ public class NetworkFirstPersonController : NetworkBehaviour
     private bool m_Jumping;
     private AudioSource m_AudioSource;
 
+
     GameObject m_carriedCube = null;
 
     NetworkCommands m_networkCommands = null;
 
+    NetworkConnection m_owner = null;
+
     [SerializeField]
     private UnityEngine.UI.Text LevelFinishedText;
+
+    public void TakeLocalControl(NetworkConnection _conn) // SERVER ONLY
+    {
+        if(m_owner != null)
+            GetComponent<NetworkIdentity>().RemoveClientAuthority(m_owner);
+
+        GetComponent<NetworkIdentity>().AssignClientAuthority(_conn);
+        Start();
+    }
+
+    [ClientRpc]
+    public void RpcTakeLocalControl(GameObject _lobbyPlayer)
+    {
+        TakeLocalControl(_lobbyPlayer.GetComponent<NetworkPlayer>().Connection);
+    }
+
+    [ClientRpc]
+    public void RpcStart()
+    {
+        Start();
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+    }
 
     // Use this for initialization
     private void Start()
     {
         m_networkCommands = FindObjectOfType<NetworkCommands>();
 
+        m_Camera = GetComponentInChildren<Camera>();
         if (!isLocalPlayer)
         {
-            GetComponentInChildren<Camera>().enabled = false;
+            m_Camera.enabled = false;
             GetComponentInChildren<AudioListener>().enabled = false;
             return;
         }
-
+        else
+        {
+            m_Camera.enabled = true;
+            GetComponentInChildren<AudioListener>().enabled = true;
+        }
+        
         m_CharacterController = GetComponent<CharacterController>();
         m_OriginalCameraPosition = m_Camera.transform.localPosition;
         m_FovKick.Setup(m_Camera);
@@ -71,12 +106,6 @@ public class NetworkFirstPersonController : NetworkBehaviour
         m_AudioSource = GetComponent<AudioSource>();
 		m_MouseLook.Init(transform , m_Camera.transform);
     }
-
-    public override void OnStartLocalPlayer()
-    {
-        m_Camera = GetComponentInChildren<Camera>();
-    }
-
 
     // Update is called once per frame
     private void Update()
@@ -99,7 +128,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
         if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
         {
             StartCoroutine(m_JumpBob.DoBobCycle());
-            PlayLandingSound();
+            CmdPlayLandingSound();
             m_MoveDir.y = 0f;
             m_Jumping = false;
         }
@@ -145,6 +174,17 @@ public class NetworkFirstPersonController : NetworkBehaviour
         }
     }
 
+    [Command]
+    private void CmdPlayLandingSound()
+    {
+        RpcPlayLandingSound();
+    }
+
+    [ClientRpc]
+    private void RpcPlayLandingSound()
+    {
+        PlayLandingSound();
+    }
 
     private void PlayLandingSound()
     {
@@ -181,7 +221,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
             if (m_Jump)
             {
                 m_MoveDir.y = m_JumpSpeed;
-                PlayJumpSound();
+                CmdPlayJumpSound();
                 m_Jump = false;
                 m_Jumping = true;
             }
@@ -198,6 +238,17 @@ public class NetworkFirstPersonController : NetworkBehaviour
         m_MouseLook.UpdateCursorLock();
     }
 
+    [Command]
+    private void CmdPlayJumpSound()
+    {
+        RpcPlayJumpSound();
+    }
+
+    [ClientRpc]
+    private void RpcPlayJumpSound()
+    {
+        PlayJumpSound();
+    }
 
     private void PlayJumpSound()
     {
@@ -221,9 +272,20 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
         m_NextStep = m_StepCycle + m_StepInterval;
 
-        PlayFootStepAudio();
+        CmdPlayFootStepAudio();
     }
 
+    [Command]
+    private void CmdPlayFootStepAudio()
+    {
+        RpcPlayFootStepAudio();
+    }
+
+    [ClientRpc]
+    private void RpcPlayFootStepAudio()
+    {
+        PlayFootStepAudio();
+    }
 
     private void PlayFootStepAudio()
     {

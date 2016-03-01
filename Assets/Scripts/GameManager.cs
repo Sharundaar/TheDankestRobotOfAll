@@ -63,4 +63,16 @@ public class GameManager : MonoBehaviour {
         if(m_MainMenu != null)
             ChangeMenuTo(m_MainMenu);
     }
+
+    public GameObject GetPlayer(PlayerType _type)
+    {
+        foreach(var obj in FindObjectsOfType<PlayerTypeComponent>())
+        {
+            if (obj.Type == _type)
+                return obj.gameObject;
+        }
+
+        Debug.LogWarning("No player of type " + _type + " found.");
+        return null;
+    }
 }

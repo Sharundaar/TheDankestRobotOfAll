@@ -1,7 +1,8 @@
-﻿public enum PlayerType
+﻿using UnityEngine;
+
+public enum PlayerType
 {
     NONE,
     SCIENTIST,
     ROBOT,
 }
-

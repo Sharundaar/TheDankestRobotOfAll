@@ -14,6 +14,7 @@ namespace Assets.Scripts.Network
         {
             GameObject player = base.OnLobbyServerCreateLobbyPlayer(conn, playerControllerId);
             player.GetComponent<NetworkPlayer>().Type = lobbySlots.Where((NetworkLobbyPlayer) => { return NetworkLobbyPlayer != null; }).Count() > 0 ? PlayerType.ROBOT : PlayerType.SCIENTIST;
+            player.GetComponent<NetworkPlayer>().Connection = conn;
             return player;
         }
     }
