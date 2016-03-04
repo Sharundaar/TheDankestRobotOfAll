@@ -23,6 +23,10 @@ abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable
 	{		
 	}
 	
+	protected void OnUpdate()
+	{		
+	}
+	
 	/* ==== IInteractivable functions ==== */ 	 
 	public bool OnInteract(GameObject callingObject, bool state)
 	{				
