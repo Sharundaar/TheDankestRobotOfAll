@@ -10,6 +10,18 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof (AudioSource))]
 public class NetworkFirstPersonController : NetworkBehaviour
 {
+    private class ExternInput
+    {
+        public float horizontal = 0;
+        public float vertical = 0;
+        public float mouseX = 0;
+        public float mouseY = 0;
+
+        public bool jumpDown = false;
+        public bool interactDown = false;
+    }
+
+
     [SerializeField] private bool m_IsWalking;
     [SerializeField] private float m_WalkSpeed;
     [SerializeField] private float m_RunSpeed;
@@ -27,6 +39,8 @@ public class NetworkFirstPersonController : NetworkBehaviour
     [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
     [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
     [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+    public MouseLook MouseLook { get { return m_MouseLook; } }
 
     private Camera m_Camera;
     private bool m_Jump;
@@ -47,55 +61,16 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
     NetworkCommands m_networkCommands = null;
 
-    NetworkConnection m_owner = null;
-
     [SerializeField]
     private UnityEngine.UI.Text LevelFinishedText;
 
-    public void TakeLocalControl(NetworkConnection _conn) // SERVER ONLY
-    {
-        if(m_owner != null)
-            GetComponent<NetworkIdentity>().RemoveClientAuthority(m_owner);
-
-        GetComponent<NetworkIdentity>().AssignClientAuthority(_conn);
-        Start();
-    }
-
-    [ClientRpc]
-    public void RpcTakeLocalControl(GameObject _lobbyPlayer)
-    {
-        TakeLocalControl(_lobbyPlayer.GetComponent<NetworkPlayer>().Connection);
-    }
-
-    [ClientRpc]
-    public void RpcStart()
-    {
-        Start();
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
-    }
-
     // Use this for initialization
+    [ServerCallback]
     private void Start()
     {
         m_networkCommands = FindObjectOfType<NetworkCommands>();
 
-        m_Camera = GetComponentInChildren<Camera>();
-        if (!isLocalPlayer)
-        {
-            m_Camera.enabled = false;
-            GetComponentInChildren<AudioListener>().enabled = false;
-            return;
-        }
-        else
-        {
-            m_Camera.enabled = true;
-            GetComponentInChildren<AudioListener>().enabled = true;
-        }
-        
+        m_Camera = GetComponentInChildren<Camera>();        
         m_CharacterController = GetComponent<CharacterController>();
         m_OriginalCameraPosition = m_Camera.transform.localPosition;
         m_FovKick.Setup(m_Camera);
@@ -105,22 +80,33 @@ public class NetworkFirstPersonController : NetworkBehaviour
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
 		m_MouseLook.Init(transform , m_Camera.transform);
+        m_MouseLook.ExternInput = true;
     }
 
-    // Update is called once per frame
+    private ExternInput m_ExternInputs = new ExternInput();
+
+    public void SetInput(float _horizontal, float _vertical, float _mouseX, float _mouseY, bool _jumpDown, bool _interactDown)
+    {
+        m_ExternInputs.horizontal = _horizontal;
+        m_ExternInputs.vertical = _vertical;
+        m_ExternInputs.jumpDown = _jumpDown;
+        m_ExternInputs.interactDown = _interactDown;
+        m_ExternInputs.mouseX = _mouseX;
+        m_ExternInputs.mouseY = _mouseY;
+    }
+
+    // Update is called once per frame, SERVER ONLY
+    [ServerCallback]
     private void Update()
     {
-        if (!isLocalPlayer)
-            return;
-
         RotateView();
         // the jump state needs to read here to make sure it is not missed
         if (!m_Jump)
         {
-            m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
+            m_Jump = m_ExternInputs.jumpDown;
         }
 
-        if(Input.GetButtonDown("Interact"))
+        if(m_ExternInputs.interactDown)
         {
             CmdPick();
         }
@@ -128,7 +114,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
         if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
         {
             StartCoroutine(m_JumpBob.DoBobCycle());
-            CmdPlayLandingSound();
+            PlayLandingSound();
             m_MoveDir.y = 0f;
             m_Jumping = false;
         }
@@ -174,18 +160,6 @@ public class NetworkFirstPersonController : NetworkBehaviour
         }
     }
 
-    [Command]
-    private void CmdPlayLandingSound()
-    {
-        RpcPlayLandingSound();
-    }
-
-    [ClientRpc]
-    private void RpcPlayLandingSound()
-    {
-        PlayLandingSound();
-    }
-
     private void PlayLandingSound()
     {
         m_AudioSource.clip = m_LandSound;
@@ -193,12 +167,9 @@ public class NetworkFirstPersonController : NetworkBehaviour
         m_NextStep = m_StepCycle + .5f;
     }
 
-
+    [ServerCallback]
     private void FixedUpdate()
     {
-        if (!isLocalPlayer)
-            return;
-
         float speed;
         GetInput(out speed);
         // always move along the camera forward as it is the direction that it being aimed at
@@ -221,7 +192,7 @@ public class NetworkFirstPersonController : NetworkBehaviour
             if (m_Jump)
             {
                 m_MoveDir.y = m_JumpSpeed;
-                CmdPlayJumpSound();
+                PlayJumpSound();
                 m_Jump = false;
                 m_Jumping = true;
             }
@@ -236,18 +207,6 @@ public class NetworkFirstPersonController : NetworkBehaviour
         UpdateCameraPosition(speed);
 
         m_MouseLook.UpdateCursorLock();
-    }
-
-    [Command]
-    private void CmdPlayJumpSound()
-    {
-        RpcPlayJumpSound();
-    }
-
-    [ClientRpc]
-    private void RpcPlayJumpSound()
-    {
-        PlayJumpSound();
     }
 
     private void PlayJumpSound()
@@ -272,18 +231,6 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
         m_NextStep = m_StepCycle + m_StepInterval;
 
-        CmdPlayFootStepAudio();
-    }
-
-    [Command]
-    private void CmdPlayFootStepAudio()
-    {
-        RpcPlayFootStepAudio();
-    }
-
-    [ClientRpc]
-    private void RpcPlayFootStepAudio()
-    {
         PlayFootStepAudio();
     }
 
@@ -331,8 +278,8 @@ public class NetworkFirstPersonController : NetworkBehaviour
     private void GetInput(out float speed)
     {
         // Read input
-        float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
-        float vertical = CrossPlatformInputManager.GetAxis("Vertical");
+        float horizontal = m_ExternInputs.horizontal;
+        float vertical = m_ExternInputs.vertical;
 
         bool waswalking = m_IsWalking;
 
@@ -363,15 +310,14 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
     private void RotateView()
     {
+        m_MouseLook.MouseX = m_ExternInputs.mouseX;
+        m_MouseLook.MouseY = m_ExternInputs.mouseY;
         m_MouseLook.LookRotation (transform, m_Camera.transform);
     }
 
-
+    [ServerCallback]
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (!isLocalPlayer)
-            return;
-
         Rigidbody body = hit.collider.attachedRigidbody;
         //dont move the rigidbody if the character is on top of it
         if (m_CollisionFlags == CollisionFlags.Below)
