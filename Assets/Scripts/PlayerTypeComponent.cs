@@ -13,7 +13,7 @@ public class PlayerTypeComponent : MonoBehaviour
         foreach (var type in types)
         {
             if (type == this)
-                return;
+                continue;
 
             if (type.Type == Type)
                 Debug.LogWarning("Two same type player registered.");
