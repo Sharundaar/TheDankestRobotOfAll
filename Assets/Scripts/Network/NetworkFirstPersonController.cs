@@ -80,7 +80,16 @@ public class NetworkFirstPersonController : NetworkBehaviour
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
 		m_MouseLook.Init(transform , m_Camera.transform);
-        m_MouseLook.ExternInput = true;
+		/*
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+        //m_MouseLook.ExternInput = true;
     }
 
     private ExternInput m_ExternInputs = new ExternInput();
@@ -310,8 +319,17 @@ public class NetworkFirstPersonController : NetworkBehaviour
 
     private void RotateView()
     {
-        m_MouseLook.MouseX = m_ExternInputs.mouseX;
-        m_MouseLook.MouseY = m_ExternInputs.mouseY;
+		/*
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+        //m_MouseLook.MouseX = m_ExternInputs.mouseX;
+        //m_MouseLook.MouseY = m_ExternInputs.mouseY;
         m_MouseLook.LookRotation (transform, m_Camera.transform);
     }
 

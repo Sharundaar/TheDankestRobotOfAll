@@ -19,6 +19,16 @@ public class InteractivableButton : AbstractInteractivable
 	{
 		base.OnStart();
 	}
+			
+	void Update ()
+	{
+		this.OnUpdate();
+	}
+	
+	protected void OnUpdate()
+	{
+		base.OnUpdate();			
+	}
 		
 	/* ==== IInteractivable function ==== */ 	 
 	protected override bool Interact(GameObject callingObject, bool state)

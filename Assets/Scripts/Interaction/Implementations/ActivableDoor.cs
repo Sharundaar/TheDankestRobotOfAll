@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent (typeof (DoorComponent))]
 public class ActivableDoor : AbstractActivable
 {
 	/* ==== Public variables ==== */
@@ -19,23 +18,39 @@ public class ActivableDoor : AbstractActivable
 	{
 		base.OnStart();
 	}
+		
+	void Update ()
+	{
+		this.OnUpdate();
+	}
+	
+	protected void OnUpdate()
+	{
+		base.OnUpdate();
+	}
 	
 	/* ==== IActivable function ==== */ 	 
 	protected override bool Activate(AbstractActivator activatorObject, bool state)
 	{
+		// AbstractActivator activatorObject
 		if(this.IsActivationAuthorized(activatorObject))
 		{
-			DoorComponent doorComponent = this.GetComponent<DoorComponent>();
-			
-			if(doorComponent != null)
-			{				
-				if(state)
-					doorComponent.Open();
-				else
-					doorComponent.Close();			
+			Component[] doorComponents =  GetComponentsInChildren<DoorComponent>();
+		
+			if(state)
+			{
+				foreach(DoorComponent doorComponent in doorComponents)
+				{
+						doorComponent.Open();
+				}
 			}
 			else
-				Debug.Log("DoorComponent is null");
+			{
+				foreach(DoorComponent doorComponent in doorComponents)
+				{
+						doorComponent.Close();
+				}
+			}		
 			
 			return true;
 		}		

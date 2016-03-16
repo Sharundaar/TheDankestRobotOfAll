@@ -7,5 +7,5 @@ interface IActivator
 	bool OnActivator(GameObject callingObject, bool state); 
 	bool IsActivatorAuthorized(GameObject callingObject);
 	
-	bool turnOff();
+	void TurnOff();
 }

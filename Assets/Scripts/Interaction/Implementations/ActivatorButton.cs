@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class ActivatorButton : AbstractActivator
 {
 	/* ==== Public variables ==== */
+	public Material activatedMaterial;
+	public Material desactivatedMaterial;
 	
 	/* ==== Private variables ==== */ 	
 	
@@ -17,6 +19,21 @@ public class ActivatorButton : AbstractActivator
 	protected void OnStart()
 	{
 		base.OnStart();
+	}
+		
+	void Update ()
+	{
+		this.OnUpdate();
+	}
+	
+	protected void OnUpdate()
+	{
+		base.OnUpdate();			
+		
+		if(activatorState)
+				gameObject.GetComponent <MeshRenderer>().material = activatedMaterial;
+			else
+				gameObject.GetComponent <MeshRenderer>().material = desactivatedMaterial;	
 	}
 	
 	/* ==== IActivator function ==== */ 	 

@@ -6,12 +6,16 @@ using System.Collections.Generic;
 abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable 
 {
 	/* ==== Public variables ==== */
+	public bool canScientificInteract = true;	
+	public bool canRobotInteract = true;	
+	
+	/* Used for holding activators */
+	public float holdingTimeForActivation = 0.0f;
+	
+	public bool isHoldingInteraction = false;
 	
 	/* ==== Private variables ==== */ 		
-	protected bool canScientificInteract = true;
-	protected bool canRobotInteract = true;
-	
-	protected bool interactionState = false;
+	protected bool interactionState = false;	
 	
 	/* ==== Start function ==== */
 	void Start () 
@@ -21,6 +25,11 @@ abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable
 	
 	protected void OnStart()
 	{		
+	}
+	
+	void Update () 
+	{
+		this.OnUpdate();
 	}
 	
 	protected void OnUpdate()
@@ -34,7 +43,7 @@ abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable
 		return this.Interact(callingObject, state);
 	}
 	protected abstract bool Interact(GameObject callingObject, bool state);
-		
+	
 	/*public string GetInteractionDisplayText()
 	{
 		return this.InteractionDisplayText();

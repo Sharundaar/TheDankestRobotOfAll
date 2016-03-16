@@ -8,16 +8,18 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 	/* ==== Public variables ==== */
 	public List<AbstractActivator> activators = new List<AbstractActivator>();
 	
-	/* ==== Private variables ==== */ 			
-	protected bool activateState = false;
-	protected bool canBeTurnedOff = false;
-	
-	protected int activatorsOnCounter = 0;
-	protected bool needAllActivatorsOn = true;
+	public bool canBeTurnedOff = false;	
+	public bool needAllActivatorsOn = true;
 	
 	/* Used for synchronized activators */
+	public float timeBeforeDesactivation = 36000;	
+	
+	/* ==== Private variables ==== */ 			
+	protected bool activateState = false;	
+	protected AbstractActivator lastActivatorObject = null;
+	
+	protected int activatorsOnCounter = 0;
 	protected float startActivationTime = 0.0f;
-	protected float timeBeforeDesactivation = 36000;	
 	
 	/* ==== Start function ==== */
 	void Start () 
@@ -36,7 +38,7 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 		{
 			if((startActivationTime + timeBeforeDesactivation) < Time.time)
 			{
-				this.OnActivate(lastCallingObject, false);
+				this.OnActivate(lastActivatorObject, false);
 			}
 		}
 	}
@@ -49,9 +51,35 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 			if(state)
 				activatorsOnCounter++;
 			else
-				activatorsOnCounter++;
+				activatorsOnCounter--;
 			
-			if(!needAllActivatorsOn || activatorsOnCounter == activators.Count)
+			if(state)
+			{
+				if(!needAllActivatorsOn || activatorsOnCounter == activators.Count)
+				{
+					/* We try to activate and inform the calling object whether the activation has been done */
+					bool hasBeenActivated = this.Activate(activatorObject, state);
+					
+					if(hasBeenActivated)
+					{
+						activateState = state;
+						lastActivatorObject = activatorObject;
+						
+						startActivationTime = Time.time;	
+
+						if(!canBeTurnedOff)
+						{
+							foreach(AbstractActivator activator in activators)
+							{
+								activator.canBeTurnedOff = false;
+							}
+						}
+					}				
+					
+					return hasBeenActivated;
+				}
+			}
+			else
 			{
 				/* We try to activate and inform the calling object whether the activation has been done */
 				bool hasBeenActivated = this.Activate(activatorObject, state);
@@ -59,19 +87,11 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 				if(hasBeenActivated)
 				{
 					activateState = state;
-					lastCallingObject = callingObject;
+					lastActivatorObject = activatorObject;
 					
-					if(state)
+					foreach(AbstractActivator activator in activators)
 					{
-						startActivationTime = Time.time;					
-					}
-					
-					else
-					{
-						foreach(AbstractActivator activator in activators)
-						{
-							activator.turnOff();
-						}
+						activator.TurnOff();
 					}
 				}				
 				return hasBeenActivated;
@@ -80,13 +100,10 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 		}		
 		return false;
 	}
-	
-	protected abstract bool Activate(AbstractActivator activatorObject, bool state);
-	
-	/* ==== Authorized Objects functions ==== */
 	public bool IsActivationAuthorized(AbstractActivator activatorObject)
 	{
-		//return this.activators.Contains(activatorObject);
-		return true;
+		return this.activators.Contains(activatorObject);
 	}
+	
+	protected abstract bool Activate(AbstractActivator activatorObject, bool state);
 }

@@ -34,8 +34,6 @@ public class InteractivableHoldingCube : AbstractInteractivable
 					
 				this.transform.parent = startParentTransform;
 				
-				interactionManager.SetHoldingCube(this.gameObject, false);
-				
 				return true;
 			}
 			else
@@ -51,8 +49,6 @@ public class InteractivableHoldingCube : AbstractInteractivable
 					
 					this.transform.parent = holdingTransform;					
 					this.transform.localPosition = tmpPosition;
-			
-					interactionManager.SetHoldingCube(this.gameObject, true);
 			
 					return true;
 				}

@@ -9,15 +9,23 @@ public class InteractionManager : MonoBehaviour
 	 *		- Move the UI things in a manager 
 	 *		- Test the raycast range when eveything will be in place (can bug with small or on-ground objects)
 	 */
+		
+	enum InteractionState 
+	{
+		NotInteracting, 
+		PendingInteracting,
+		Holding
+	};
 	
-	/* ==== Public variables ==== */
+	/* ==== Public variables ==== */	
 	public Transform holdingTransform = null;
 	
 	/* ==== Private variables ==== */ 	
+	private InteractionState interactionState = InteractionState.NotInteracting;
 	private Text interactTextField = null;
 	
-	private bool isHoldingCube = false;
-	private GameObject holdingCube = null;
+	private AbstractInteractivable currentInteractionObject = null;	
+	private float startInteractionTime = 0.0f;
 	
 	/* ==== Start function ==== */
 	void Start () 
@@ -41,37 +49,83 @@ public class InteractionManager : MonoBehaviour
 			RaycastHit hitInfo;							
 			if (Physics.Raycast(fpsCamera.transform.position, fpsCamera.transform.TransformDirection(Vector3.forward), out hitInfo, 3)) 
 			{
-				IInteractivable interactivableObject = hitInfo.collider.gameObject.GetComponent<IInteractivable>();
+				AbstractInteractivable interactivableObject = hitInfo.collider.gameObject.GetComponent<AbstractInteractivable>();
 
 				if(interactivableObject != null)
 				{
-					if(this.isHoldingCube)
+					if(this.interactionState == InteractionState.NotInteracting)
 					{
-						if(hitInfo.collider.gameObject == this.holdingCube)
+						if(Input.GetButtonDown("Interact"))		
 						{
-							if(Input.GetButtonDown("Interact"))		
+							currentInteractionObject = interactivableObject;
+							
+							if(interactivableObject.holdingTimeForActivation > 0.01f)
+							{								
+								this.interactionState = InteractionState.PendingInteracting;
+								this.startInteractionTime = Time.time;								
+							}
+							else
 							{
-								bool hasInteract = interactivableObject.OnInteract(this.gameObject, false);											
+								this.LaunchTheInteraction();
+							}								
+						}		
+						else
+						{
+							interactTextFieldVisibility = true;	
+							
+							if(interactivableObject.holdingTimeForActivation > 0.01f)
+							{								
+								interactTextField.text = "Hold E to Interact";			
+							}
+							else
+							{
+								interactTextField.text = "Press E to Interact";									
+							}		
+						}	
+					}
+					else if(this.interactionState == InteractionState.PendingInteracting)
+					{
+						if(interactivableObject == currentInteractionObject)
+						{
+							if(Input.GetButton("Interact"))		
+							{
+								if((this.startInteractionTime + interactivableObject.holdingTimeForActivation) < Time.time)
+								{
+									this.LaunchTheInteraction();								
+									interactTextFieldVisibility = false;			
+								}		
+								else
+								{
+									interactTextFieldVisibility = true;		
+									interactTextField.text = "Keep holding E to Interact";											
+								}															
 							}						
 							else
 							{
-								interactTextFieldVisibility = true;				
-								interactTextField.text = "Press E to Release";										
+								StopTheInteraction();
 							}	
-						}			
+						}
+						else
+						{
+							StopTheInteraction();
+						}
 					}
 					else
 					{
 						if(Input.GetButtonDown("Interact"))		
 						{
-							bool hasInteract = interactivableObject.OnInteract(this.gameObject, true);											
-						}		
+							StopTheInteraction();															
+						}						
 						else
 						{
 							interactTextFieldVisibility = true;		
-							interactTextField.text = "Press E to Interact";
-						}			
-					}
+							interactTextField.text = "Press E to Release";	
+						}	
+					}				
+				}
+				else
+				{
+					StopTheInteraction();
 				}
 			}
 			
@@ -79,15 +133,35 @@ public class InteractionManager : MonoBehaviour
 		}				
 	}
 	
-	/* ==== Interactions related functions ==== */
+	private bool LaunchTheInteraction()
+	{
+		bool hasInteract = this.currentInteractionObject.OnInteract(this.gameObject, true);			
+		if(hasInteract)
+		{
+			if(this.currentInteractionObject.isHoldingInteraction)
+			{
+				this.interactionState = InteractionState.Holding;										
+			}			
+		}
+		return hasInteract;
+	}
+	private void StopTheInteraction()
+	{
+		bool hasInteract = true;
+		
+		if(this.interactionState == InteractionState.Holding)
+			hasInteract = this.currentInteractionObject.OnInteract(this.gameObject, false);			
+		
+		if(hasInteract)
+		{
+			this.currentInteractionObject = null;
+			this.interactionState = InteractionState.NotInteracting;
+		}
+	}
+
 	public Transform GetHoldingTransform()
 	{
 		return this.holdingTransform;
-	}
-	public void SetHoldingCube(GameObject holdingCube, bool state)
-	{
-		this.isHoldingCube = state;
-		this.holdingCube = holdingCube;
 	}
 	
 	/* ==== UI functions ==== */

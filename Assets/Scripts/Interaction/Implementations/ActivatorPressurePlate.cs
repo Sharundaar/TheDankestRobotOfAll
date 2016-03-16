@@ -20,6 +20,16 @@ public class ActivatorPressurePlate : AbstractActivator
 		base.OnStart();
 	}
 	
+	void Update ()
+	{
+		this.OnUpdate();
+	}
+	
+	protected void OnUpdate()
+	{
+		base.OnUpdate();
+	}
+	
 	/* ==== IActivator function ==== */ 	 
 	protected override bool Activator(GameObject callingObject, bool state)
 	{

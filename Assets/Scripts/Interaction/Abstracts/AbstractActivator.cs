@@ -7,22 +7,20 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 {
 	/* ==== Public variables ==== */
 	public List<AbstractActivable> activableTargets = new List<AbstractActivable>();	
-		
-	/* ==== Private variables ==== */ 			
-	protected bool activatorState = false;		
-	protected bool canBeTurnedOff = true;
 	
-	protected GameObject lastCallingObject = null;
+	public bool canBeTurnedOff = true;	
 	
-	protected bool canScientificActivate = true;
-	protected bool canRobotActivate = true;
+	public bool canScientificActivate = true;
+	public bool canRobotActivate = true;	
 	
 	/* Used for synchronized activators */
-	protected float startActivationTime = 0.0f;
-	protected float timeBeforeDesactivation = 36000;	
+	public float timeBeforeDesactivation = 36000;	
+		
+	/* ==== Private variables ==== */ 			
+	protected bool activatorState = false;	
+	protected GameObject lastCallingObject = null;
 	
-	/* Used for holding activators */
-	protected float holdingTimeForActivation = 0.0f;
+	protected float startActivationTime = 0.0f;
 	
 	/* ==== Start function ==== */
 	void Start () 
@@ -32,6 +30,11 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 	
 	protected void OnStart()
 	{		
+	}
+	
+	void Update () 
+	{
+		this.OnUpdate();
 	}
 	
 	protected void OnUpdate()
@@ -68,17 +71,15 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 		}		
 		return false;
 	}
+	public bool IsActivatorAuthorized(GameObject callingObject)
+	{
+		return true;
+	}	
 	
-	public void turnOff()
+	public void TurnOff()
 	{
 		activatorState = false;		
 	}
 	
-	protected abstract bool Activator(GameObject callingObject, bool state);
-	
-	/* ==== Authorized Objects functions ==== */
-	public bool IsActivatorAuthorized(GameObject callingObject)
-	{
-		return true;
-	}
+	protected abstract bool Activator(GameObject activatorObject, bool state);
 }
