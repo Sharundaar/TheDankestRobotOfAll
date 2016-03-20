@@ -45,14 +45,14 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 	
 	/* ==== IActivable functions ==== */ 	 
 	public bool OnActivate(AbstractActivator activatorObject, bool state)
-	{				
-		if(!(canBeTurnedOff == false && state == false))
-		{
-			if(state)
-				activatorsOnCounter++;
-			else
-				activatorsOnCounter--;
+	{	
+		if(state)
+			activatorsOnCounter++;
+		else
+			activatorsOnCounter--;
 			
+		if(!(canBeTurnedOff == false && state == false))
+		{			
 			if(state)
 			{
 				if(!needAllActivatorsOn || activatorsOnCounter == activators.Count)
@@ -69,6 +69,7 @@ abstract public class AbstractActivable : MonoBehaviour, IActivable
 
 						if(!canBeTurnedOff)
 						{
+							Debug.Log("==> " + state);
 							foreach(AbstractActivator activator in activators)
 							{
 								activator.canBeTurnedOff = false;

@@ -46,9 +46,4 @@ public class InteractivableButton : AbstractInteractivable
 		}		
 		return false;
 	}
-	
-	/*protected string InteractionDisplayText(int status)
-	{
-		
-	}*/
 }

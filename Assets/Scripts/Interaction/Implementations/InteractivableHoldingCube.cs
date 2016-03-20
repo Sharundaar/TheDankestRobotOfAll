@@ -23,38 +23,40 @@ public class InteractivableHoldingCube : AbstractInteractivable
 	/* ==== Interact function ==== */ 	 
 	protected override bool Interact(GameObject callingObject, bool state)
 	{		
-		InteractionManager interactionManager = callingObject.GetComponent<InteractionManager>();
-		
-		if(interactionManager != null)
-		{					
-			if(!state)
-			{
-				this.GetComponent<Rigidbody>().useGravity = true;
-				this.GetComponent<Rigidbody>().isKinematic = false;
-					
-				this.transform.parent = startParentTransform;
-				
-				return true;
-			}
-			else
-			{		
-				Transform holdingTransform = interactionManager.GetHoldingTransform();
-				
-				if(holdingTransform != null)
-				{
-					Vector3 tmpPosition = new Vector3(0.0f, 0.0f, 0.0f);
-					
-					this.GetComponent<Rigidbody>().useGravity = false;
-					this.GetComponent<Rigidbody>().isKinematic = true;
-					
-					this.transform.parent = holdingTransform;					
-					this.transform.localPosition = tmpPosition;
+		if(this.IsInteractionAuthorized(callingObject))
+		{
+			InteractionManager interactionManager = callingObject.GetComponent<InteractionManager>();
 			
+			if(interactionManager != null)
+			{					
+				if(!state)
+				{
+					this.GetComponent<Rigidbody>().useGravity = true;
+					this.GetComponent<Rigidbody>().isKinematic = false;
+						
+					this.transform.parent = startParentTransform;
+					
 					return true;
+				}
+				else
+				{		
+					Transform holdingTransform = interactionManager.GetHoldingTransform();
+					
+					if(holdingTransform != null)
+					{
+						Vector3 tmpPosition = new Vector3(0.0f, 0.0f, 0.0f);
+						
+						this.GetComponent<Rigidbody>().useGravity = false;
+						this.GetComponent<Rigidbody>().isKinematic = true;
+						
+						this.transform.parent = holdingTransform;					
+						this.transform.localPosition = tmpPosition;
+				
+						return true;
+					}
 				}
 			}
 		}
-		
 		return false;
 	}
 }

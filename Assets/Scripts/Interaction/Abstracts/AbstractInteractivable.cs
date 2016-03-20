@@ -43,17 +43,27 @@ abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable
 		return this.Interact(callingObject, state);
 	}
 	protected abstract bool Interact(GameObject callingObject, bool state);
-	
-	/*public string GetInteractionDisplayText()
-	{
-		return this.InteractionDisplayText();
-	}
-	protected abstract string InteractionDisplayText();*/
-	
+		
 	/* ==== Authorized Objects functions ==== */
 	public bool IsInteractionAuthorized(GameObject callingObject)
 	{
-		return true;
+		PlayerTypeComponent playerTypeComponent = callingObject.GetComponent<PlayerTypeComponent>();
+		if(playerTypeComponent != null)
+		{
+			PlayerType playerType = playerTypeComponent.Type;
+			if(playerType == PlayerType.SCIENTIST)
+			{
+				if(canScientificInteract)
+					return true;				
+			}
+			else if(playerType == PlayerType.ROBOT)
+			{
+				if(canRobotInteract)
+					return true;
+			}
+		}
+		
+		return false;
 	}
 
 }

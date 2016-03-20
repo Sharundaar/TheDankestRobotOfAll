@@ -55,7 +55,7 @@ public class InteractionManager : MonoBehaviour
 				{
 					if(this.interactionState == InteractionState.NotInteracting)
 					{
-						if(Input.GetButtonDown("Interact"))		
+						if(Input.GetButtonDown("Interact") && interactivableObject.IsInteractionAuthorized(this.gameObject))		
 						{
 							currentInteractionObject = interactivableObject;
 							
@@ -79,7 +79,7 @@ public class InteractionManager : MonoBehaviour
 							}
 							else
 							{
-								interactTextField.text = "Press E to Interact";									
+								interactTextField.text = this.GetStartingInteractionText(interactivableObject);									
 							}		
 						}	
 					}
@@ -143,6 +143,10 @@ public class InteractionManager : MonoBehaviour
 				this.interactionState = InteractionState.Holding;										
 			}			
 		}
+		else
+		{
+			this.currentInteractionObject = null;
+		}
 		return hasInteract;
 	}
 	private void StopTheInteraction()
@@ -169,5 +173,33 @@ public class InteractionManager : MonoBehaviour
 	{			
 		if(this.interactTextField != null)
 			this.interactTextField.enabled  = visibility;
+	}
+	
+	private string GetStartingInteractionText(AbstractInteractivable interactivableObject)
+	{
+		PlayerTypeComponent playerTypeComponent = this.GetComponent<PlayerTypeComponent>();
+		if(playerTypeComponent != null)
+		{
+			PlayerType playerType = playerTypeComponent.Type;
+			
+			if((playerType == PlayerType.SCIENTIST && interactivableObject.canScientificInteract) 
+			|| (playerType == PlayerType.ROBOT && interactivableObject.canRobotInteract))
+			{
+				return "Press E to Interact";			
+			}
+			else if(playerType == PlayerType.SCIENTIST && interactivableObject.canRobotInteract)
+			{
+				return "Only the Robot can Interact with this it";	
+			}
+			else if(playerType == PlayerType.ROBOT && interactivableObject.canScientificInteract)
+			{
+				return "Only the Scientific can Interact with it";	
+			}
+			else
+			{
+				return "This interaction is not available yet";	
+			}
+		}
+		return "Undefined StartingInteractionText";
 	}
 }

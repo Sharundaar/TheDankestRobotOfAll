@@ -10,9 +10,6 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 	
 	public bool canBeTurnedOff = true;	
 	
-	public bool canScientificActivate = true;
-	public bool canRobotActivate = true;	
-	
 	/* Used for synchronized activators */
 	public float timeBeforeDesactivation = 36000;	
 		
@@ -38,7 +35,7 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 	}
 	
 	protected void OnUpdate()
-	{		
+	{				
 		if(activatorState && canBeTurnedOff)
 		{
 			if((startActivationTime + timeBeforeDesactivation) < Time.time)
