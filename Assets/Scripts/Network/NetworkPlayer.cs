@@ -51,4 +51,11 @@ public class NetworkPlayer : LobbyPlayer
                 break;
         }
     }
+
+    public override void OnClientEnterLobby()
+    {
+        base.OnClientEnterLobby();
+
+        UpdateTypeButton();
+    }
 }

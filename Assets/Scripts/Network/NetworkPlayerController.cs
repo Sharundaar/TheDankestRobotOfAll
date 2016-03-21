@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.Networking;
 using UnityStandardAssets.Network;
 
-public class NetworkPlayerController : NetworkBehaviour {
+public class NetworkPlayerControllerTest : NetworkBehaviour {
 
     public bool ShowDebugInformations = false;
 
@@ -121,7 +121,7 @@ public class NetworkPlayerController : NetworkBehaviour {
             var player = GameManager.Instance().GetPlayer(m_type);
             m_controller = player != null ? player.GetComponent<NetworkFirstPersonController>() : null;
         }
-        else
+        if (m_controller == null)
         {
             m_controller.SetInput(m_horizontal, m_vertical, m_mouseX, m_mouseY, m_jump, m_interact);
         }
@@ -148,20 +148,7 @@ public class NetworkPlayerController : NetworkBehaviour {
         {
             DisableCamera();
             DisableAudioListener();
-
-            if(m_controller != null)
-            {
-                m_controller.GetComponent<InteractionManager>().IsLocallyControlled = false;
-            }
-
-
             m_controller = player.GetComponent<NetworkFirstPersonController>();
-
-            if (m_controller != null)
-            {
-                m_controller.GetComponent<InteractionManager>().IsLocallyControlled = true;
-            }
-
             EnableCamera();
             EnableAudioListener();
         }

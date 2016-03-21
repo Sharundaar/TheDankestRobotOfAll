@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 /* Class AbstractActivator : define an abstract class for activator objects */
-abstract public class AbstractActivator : MonoBehaviour, IActivator 
+abstract public class AbstractActivator : NetworkBehaviour, IActivator 
 {
 	/* ==== Public variables ==== */
 	public List<AbstractActivable> activableTargets = new List<AbstractActivable>();	
@@ -14,10 +15,13 @@ abstract public class AbstractActivator : MonoBehaviour, IActivator
 	public float timeBeforeDesactivation = 36000;	
 		
 	/* ==== Private variables ==== */ 			
-	protected bool activatorState = false;	
-	protected GameObject lastCallingObject = null;
-	
-	protected float startActivationTime = 0.0f;
+    [SyncVar]
+	protected bool activatorState = false;
+    [SyncVar]
+    protected GameObject lastCallingObject = null;
+
+    [SyncVar]
+    protected float startActivationTime = 0.0f;
 	
 	/* ==== Start function ==== */
 	void Start () 

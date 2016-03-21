@@ -1,20 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 /* Class AbstractInteractivable : define an abstract class for interactivable objects */
-abstract public class AbstractInteractivable : MonoBehaviour, IInteractivable 
+abstract public class AbstractInteractivable : NetworkBehaviour, IInteractivable 
 {
 	/* ==== Public variables ==== */
 	public bool canScientificInteract = true;	
-	public bool canRobotInteract = true;	
+	public bool canRobotInteract = true;
+
+    /* Used for holding activators */
+    [SyncVar]
+    public float holdingTimeForActivation = 0.0f;
 	
-	/* Used for holding activators */
-	public float holdingTimeForActivation = 0.0f;
-	
+    [SyncVar]
 	public bool isHoldingInteraction = false;
 	
-	/* ==== Private variables ==== */ 		
+	/* ==== Private variables ==== */ 	
+    [SyncVar]	
 	protected bool interactionState = false;	
 	
 	/* ==== Start function ==== */

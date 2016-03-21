@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 /* Class AbstractActivable : define an abstract class for activable objects */
-abstract public class AbstractActivable : MonoBehaviour, IActivable
+abstract public class AbstractActivable : NetworkBehaviour, IActivable
 {
 	/* ==== Public variables ==== */
 	public List<AbstractActivator> activators = new List<AbstractActivator>();

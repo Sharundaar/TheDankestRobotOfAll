@@ -1,36 +1,32 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
-[ExecuteInEditMode]
-public class WaterBasic : LethalZone
+namespace UnityStandardAssets.Water
 {
-	void Start()
-	{
-		this.timeScalingFactor = 1.0f / 20.0f;
-	}
-	
-	void Update()
-	{
-		base.OnUpdate();
-	}
-	
-    void OnTriggerEnter(Collider colliding) 
-	{
-		if(this.checkpoint != null)
-		{
-			PlayerTypeComponent playerTypeComponent = colliding.gameObject.GetComponent<PlayerTypeComponent>();
-			
-			Vector3 newPosition = this.checkpoint.transform.position;
-			Quaternion newRotation = this.checkpoint.transform.rotation;
-			
-			if(playerTypeComponent != null)
-			{
-				if(playerTypeComponent.Type == PlayerType.ROBOT)
-				{
-					colliding.gameObject.transform.position = newPosition;
-					colliding.gameObject.transform.rotation = newRotation;
-				}
-			}			
-		}
+    [ExecuteInEditMode]
+    public class WaterBasic : MonoBehaviour
+    {
+        void Update()
+        {
+            Renderer r = GetComponent<Renderer>();
+            if (!r)
+            {
+                return;
+            }
+            Material mat = r.sharedMaterial;
+            if (!mat)
+            {
+                return;
+            }
+
+            Vector4 waveSpeed = mat.GetVector("WaveSpeed");
+            float waveScale = mat.GetFloat("_WaveScale");
+            float t = Time.time / 20.0f;
+
+            Vector4 offset4 = waveSpeed * (t * waveScale);
+            Vector4 offsetClamped = new Vector4(Mathf.Repeat(offset4.x, 1.0f), Mathf.Repeat(offset4.y, 1.0f),
+                Mathf.Repeat(offset4.z, 1.0f), Mathf.Repeat(offset4.w, 1.0f));
+            mat.SetVector("_WaveOffset", offsetClamped);
+        }
     }
 }

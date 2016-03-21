@@ -1,35 +1,45 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.Networking;
 
-public class InteractionManager : MonoBehaviour 
+public class InteractionManager : NetworkBehaviour
 {
-	/*
+    /*
 	 * TODO : 
 	 *		- Move the UI things in a manager 
 	 *		- Test the raycast range when eveything will be in place (can bug with small or on-ground objects)
 	 */
-		
-	enum InteractionState 
+
+    enum InteractionState
+    {
+        NotInteracting,
+        PendingInteracting,
+        Holding
+    };
+
+    /* ==== Public variables ==== */
+    public Transform holdingTransform = null;
+
+    /* ==== Private variables ==== */
+    private InteractionState interactionState = InteractionState.NotInteracting;
+    private Text interactTextField = null;
+
+    [SyncVar]
+    private GameObject ms_currentInteractionObject = null;
+
+    private AbstractInteractivable currentInteractionObject { get { return ms_currentInteractionObject.GetComponent<AbstractInteractivable>(); } set { ms_currentInteractionObject = value != null ? value.gameObject : null; } }
+    private float startInteractionTime = 0.0f;
+
+    private bool m_isLocallyControlled = false;
+    public bool IsLocallyControlled { get { return m_isLocallyControlled; } set { m_isLocallyControlled = value; } }
+
+    /* ==== Start function ==== */
+    void Start () 
 	{
-		NotInteracting, 
-		PendingInteracting,
-		Holding
-	};
-	
-	/* ==== Public variables ==== */	
-	public Transform holdingTransform = null;
-	
-	/* ==== Private variables ==== */ 	
-	private InteractionState interactionState = InteractionState.NotInteracting;
-	private Text interactTextField = null;
-	
-	private AbstractInteractivable currentInteractionObject = null;	
-	private float startInteractionTime = 0.0f;
-	
-	/* ==== Start function ==== */
-	void Start () 
-	{
+        if (!IsLocallyControlled)
+            return;
+
 		Text[] textFieldsArray = FindObjectsOfType(typeof(Text)) as Text[];
 		foreach(Text tf in textFieldsArray)
 		{
@@ -40,8 +50,8 @@ public class InteractionManager : MonoBehaviour
 	
 	/* ==== Update function ==== */
 	void Update () 
-	{		
-		Camera fpsCamera = this.GetComponentInChildren<Camera>();
+	{
+        Camera fpsCamera = this.GetComponentInChildren<Camera>();
 		if(fpsCamera != null)
 		{			
 			bool interactTextFieldVisibility = false;
@@ -66,21 +76,24 @@ public class InteractionManager : MonoBehaviour
 							}
 							else
 							{
-								this.LaunchTheInteraction();
+								this.CmdLaunchTheInteraction();
 							}								
 						}		
 						else
 						{
-							interactTextFieldVisibility = true;	
+                            if(interactTextField != null)
+                            {
+							    interactTextFieldVisibility = true;	
 							
-							if(interactivableObject.holdingTimeForActivation > 0.01f)
-							{								
-								interactTextField.text = "Hold E to Interact";			
-							}
-							else
-							{
-								interactTextField.text = this.GetStartingInteractionText(interactivableObject);									
-							}		
+							    if(interactivableObject.holdingTimeForActivation > 0.01f)
+							    {								
+								    interactTextField.text = "Hold E to Interact";			
+							    }
+							    else
+							    {
+								    interactTextField.text = this.GetStartingInteractionText(interactivableObject);									
+							    }		
+                            }
 						}	
 					}
 					else if(this.interactionState == InteractionState.PendingInteracting)
@@ -91,41 +104,47 @@ public class InteractionManager : MonoBehaviour
 							{
 								if((this.startInteractionTime + interactivableObject.holdingTimeForActivation) < Time.time)
 								{
-									this.LaunchTheInteraction();								
+									this.CmdLaunchTheInteraction();								
 									interactTextFieldVisibility = false;			
 								}		
 								else
 								{
-									interactTextFieldVisibility = true;		
-									interactTextField.text = "Keep holding E to Interact";											
+                                    if(interactTextField != null)
+                                    {
+									    interactTextFieldVisibility = true;		
+									    interactTextField.text = "Keep holding E to Interact";											
+                                    }
 								}															
 							}						
 							else
 							{
-								StopTheInteraction();
+                                CmdStopTheInteraction();
 							}	
 						}
 						else
 						{
-							StopTheInteraction();
+                            CmdStopTheInteraction();
 						}
 					}
 					else
 					{
 						if(Input.GetButtonDown("Interact"))		
 						{
-							StopTheInteraction();															
+                            CmdStopTheInteraction();															
 						}						
 						else
 						{
-							interactTextFieldVisibility = true;		
-							interactTextField.text = "Press E to Release";	
+                            if(interactTextField != null)
+                            {
+							    interactTextFieldVisibility = true;		
+							    interactTextField.text = "Press E to Release";	
+                            }
 						}	
 					}				
 				}
 				else
 				{
-					StopTheInteraction();
+                    CmdStopTheInteraction();
 				}
 			}
 			
@@ -133,7 +152,8 @@ public class InteractionManager : MonoBehaviour
 		}				
 	}
 	
-	private bool LaunchTheInteraction()
+    [Command]
+	private void CmdLaunchTheInteraction()
 	{
 		bool hasInteract = this.currentInteractionObject.OnInteract(this.gameObject, true);			
 		if(hasInteract)
@@ -147,9 +167,10 @@ public class InteractionManager : MonoBehaviour
 		{
 			this.currentInteractionObject = null;
 		}
-		return hasInteract;
 	}
-	private void StopTheInteraction()
+
+    [Command]
+	private void CmdStopTheInteraction()
 	{
 		bool hasInteract = true;
 		
